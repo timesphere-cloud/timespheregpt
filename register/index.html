@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TimeSphereGPT — Register</title>
+
+  <!-- Fonts & icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <style>
+    :root{
+      --bg1:#071029; --bg2:#0f1724;
+      --card: rgba(255,255,255,0.03);
+      --accent1:#8b5cf6; --accent2:#06b6d4;
+      --muted: rgba(255,255,255,0.68);
+      --ok:#90ee90; --err:#ffb4b4;
+      font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      display:flex;align-items:center;justify-content:center;padding:20px;color:#eaf2ff;
+    }
+
+    .container{
+      width:100%; max-width:980px; border-radius:14px; overflow:hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border:1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 12px 40px rgba(2,6,23,0.6);
+      display:grid; grid-template-columns: 1fr 360px;
+    }
+
+    /* Left: steps content */
+    .left{
+      padding:28px;
+    }
+
+    /* header with logo and small hint */
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;
+    }
+    .logo{
+      display:flex;gap:12px;align-items:center;
+    }
+    .logo-mark{
+      width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));
+      display:grid;place-items:center;font-weight:800;color:white;font-size:18px;
+    }
+    .logo-text .title{font-weight:700;font-size:16px}
+    .logo-text .sub{font-size:13px;color:var(--muted)}
+
+    /* progress steps */
+    .steps{
+      display:flex;gap:12px;align-items:center;margin-bottom:22px;
+    }
+    .step{
+      display:flex;flex-direction:column;align-items:center;text-align:center;
+      width:80px;cursor:pointer;text-decoration:none;color:inherit;
+    }
+    .step .dot{
+      width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--card);
+      border:1px solid rgba(255,255,255,0.02);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .step.active .dot{ background: linear-gradient(90deg,var(--accent1),var(--accent2)); transform:translateY(-4px); box-shadow:0 12px 30px rgba(11,12,29,0.6);}
+    .step label{font-size:12px;color:var(--muted);margin-top:6px}
+
+    h2{margin:0 0 8px 0;font-size:20px}
+    p.lead{margin:0 0 18px 0;color:var(--muted)}
+
+    /* forms */
+    .card{
+      background: rgba(255,255,255,0.01); border-radius:12px; padding:18px; border:1px solid rgba(255,255,255,0.02);
+    }
+    form .row{display:flex;gap:12px;margin-bottom:12px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="text"], input[type="email"], input[type="password"], input[type="date"], select{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.01); color:white; outline:none; font-size:14px;
+    }
+    .note{font-size:13px;color:var(--muted);margin-bottom:8px}
+
+    .buttons{
+      display:flex;gap:10px;justify-content:flex-end;margin-top:14px;
+    }
+    .btn{
+      padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer;
+    }
+    .btn.secondary{ background: rgba(255,255,255,0.03); color: white; }
+    .btn.ghost{ background: transparent; border: 1px solid rgba(255,255,255,0.03); color:var(--muted) }
+    .btn.primary{ background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:white; }
+
+    .msg{font-size:13px;padding:10px;border-radius:8px}
+    .msg.error{background: rgba(255,180,180,0.04); color:var(--err)}
+    .msg.ok{background: rgba(144,238,144,0.04); color:var(--ok)}
+
+    /* right side: preview / help */
+    .right{
+      padding:24px;background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+      border-left:1px solid rgba(255,255,255,0.02);
+    }
+    .preview{
+      border-radius:10px;padding:12px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02);
+    }
+    .preview h4{margin:0 0 8px 0}
+    .preview .item{font-size:14px;color:var(--muted);margin-bottom:8px}
+    .small{font-size:12px;color:var(--muted)}
+
+    /* responsive */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr}
+      .right{order:3}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-labelledby="reg-heading">
+    <div class="left">
+      <div class="topbar">
+        <div class="logo">
+          <div class="logo-mark">TS</div>
+          <div class="logo-text">
+            <div id="reg-heading" class="title">TimeSphereGPT — Rejestracja</div>
+            <div class="sub">Krok po kroku — utwórz konto</div>
+          </div>
+        </div>
+        <div class="small">
+          <button id="cancelBtn" class="btn ghost" title="Anuluj">Anuluj</button>
+        </div>
+      </div>
+
+      <nav class="steps" aria-label="Postęp rejestracji" id="stepsNav">
+        <a class="step" data-step="1" id="s1" href="?step=1">
+          <div class="dot">1</div>
+          <label>Personal</label>
+        </a>
+        <a class="step" data-step="2" id="s2" href="?step=2">
+          <div class="dot">2</div>
+          <label>Security</label>
+        </a>
+        <a class="step" data-step="3" id="s3" href="?step=3">
+          <div class="dot">3</div>
+          <label>Personalise</label>
+        </a>
+        <a class="step" data-step="4" id="s4" href="?step=4">
+          <div class="dot">4</div>
+          <label>All done</label>
+        </a>
+      </nav>
+
+      <!-- Content area where different step forms will be shown -->
+      <div id="contentArea" class="card" aria-live="polite"></div>
+    </div>
+
+    <aside class="right">
+      <div class="preview">
+        <h4>Podgląd</h4>
+        <div class="item"><strong>Email:</strong> <span id="pfEmail" class="small muted">—</span></div>
+        <div class="item"><strong>Nickname:</strong> <span id="pfNick" class="small muted">—</span></div>
+        <div class="item"><strong>Birthdate:</strong> <span id="pfBirth" class="small muted">—</span></div>
+        <div class="item"><strong>Theme:</strong> <span id="pfTheme" class="small muted">standard</span></div>
+        <div class="item"><strong>Font:</strong> <span id="pfFont" class="small muted">Poppins</span></div>
+      </div>
+
+      <div style="height:16px"></div>
+
+      <div class="small">Notatka: Nickname jest sprawdzany w czasie rzeczywistym i (jeśli wolny) rezerwowany w kolekcji <code>nicknames</code>.</div>
+    </aside>
+  </div>
+
+  <!-- Firebase + logic -->
+  <script type="module">
+    // Firebase modular SDK imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    // Your Firebase config (same as login)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5hHDpz0oYg5sW-EeCierI75fiMScowyw",
+      authDomain: "timespheregpt.firebaseapp.com",
+      projectId: "timespheregpt",
+      storageBucket: "timespheregpt.firebasestorage.app",
+      messagingSenderId: "778476965380",
+      appId: "1:778476965380:web:a9c78bfb824eb3a3baaf51"
+    };
+
+    // Initialize
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Helpers: read step from query ?step=N
+    function getStepFromUrl(){
+      const url = new URL(location.href);
+      const s = Number(url.searchParams.get('step') || '1');
+      if (![1,2,3,4].includes(s)) return 1;
+      return s;
+    }
+
+    // State persisted locally until account creation
+    const state = {
+      step: getStepFromUrl(),
+      birthdate: '',
+      email: '',
+      nickname: '',
+      password: '',
+      passwordRepeat: '',
+      theme: 'standard',
+      font: 'Poppins',
+      nicknameReserved: false
+    };
+
+    // UI refs
+    const stepsEls = {1:document.getElementById('s1'),2:document.getElementById('s2'),3:document.getElementById('s3'),4:document.getElementById('s4')};
+    const contentArea = document.getElementById('contentArea');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    const pfEmail = document.getElementById('pfEmail');
+    const pfNick = document.getElementById('pfNick');
+    const pfBirth = document.getElementById('pfBirth');
+    const pfTheme = document.getElementById('pfTheme');
+    const pfFont = document.getElementById('pfFont');
+
+    // On auth: if already logged in -> redirect to chats
+    let redirected = false;
+    onAuthStateChanged(auth, (user)=>{
+      if (user && !redirected) {
+        redirected = true;
+        location.href = '/timespheregpt/chats/';
+      }
+    });
+
+    // Update preview
+    function refreshPreview(){
+      pfEmail.textContent = state.email || '—';
+      pfNick.textContent = state.nickname || '—';
+      pfBirth.textContent = state.birthdate || '—';
+      pfTheme.textContent = state.theme;
+      pfFont.textContent = state.font;
+    }
+
+    // Mark active step in UI
+    function renderSteps(){
+      for (let i=1;i<=4;i++){
+        const el = stepsEls[i];
+        if (!el) continue;
+        if (i === state.step) el.classList.add('active'); else el.classList.remove('active');
+      }
+    }
+
+    // Render content based on step
+    function renderContent(){
+      renderSteps();
+      refreshPreview();
+      const s = state.step;
+      if (s === 1) return renderStep1();
+      if (s === 2) return renderStep2();
+      if (s === 3) return renderStep3();
+      return renderStep4();
+    }
+
+    // Utility to change step (updates URL)
+    function goToStep(n){
+      state.step = n;
+      const url = new URL(location.href);
+      url.searchParams.set('step', n);
+      history.replaceState({}, '', url);
+      renderContent();
+    }
+
+    // Cancel -> go home
+    cancelBtn.addEventListener('click', ()=>{ location.href = '/'; });
+
+    /* ------------------ STEP 1: Personal data ------------------ */
+    function renderStep1(){
+      contentArea.innerHTML = `
+        <h2>Step 1 — Dane personalne</h2>
+        <p class="lead">Podaj datę urodzenia, email i wymarzony nickname.</p>
+
+        <div id="msgBox"></div>
+
+        <form id="form1">
+          <div class="row">
+            <div style="flex:1">
+              <label for="birth">Data urodzenia</label>
+              <input id="birth" name="birth" type="date" value="${escapeHtml(state.birthdate)}" required />
+            </div>
+
+            <div style="flex:1">
+              <label for="email">Email</label>
+              <input id="emailInput" name="email" type="email" placeholder="you@przyklad.pl" value="${escapeHtml(state.email)}" required />
+            </div>
+          </div>
+
+          <div style="margin-bottom:8px">
+            <label for="nick">Nickname</label>
+            <input id="nick" name="nick" type="text" placeholder="Twój nickname" value="${escapeHtml(state.nickname)}" required />
+            <div id="nickHint" class="small muted" style="margin-top:6px">Nickname będzie sprawdzony i (jeśli wolny) zarezerwowany.</div>
+          </div>
+
+          <div class="buttons">
+            <button type="button" id="cancelStep1" class="btn ghost">Cancel</button>
+            <button type="button" id="nextStep1" class="btn primary">Next step →</button>
+          </div>
+        </form>
+      `;
+
+      // bind
+      document.getElementById('cancelStep1').addEventListener('click', ()=>location.href='/');
+      const nextBtn = document.getElementById('nextStep1');
+      const form1 = document.getElementById('form1');
+      const birth = document.getElementById('birth');
+      const emailInput = document.getElementById('emailInput');
+      const nick = document.getElementById('nick');
+      const nickHint = document.getElementById('nickHint');
+      const msgBox = document.getElementById('msgBox');
+
+      // local update handlers
+      birth.addEventListener('change', ()=>{ state.birthdate = birth.value; refreshPreview(); });
+      emailInput.addEventListener('input', ()=>{ state.email = emailInput.value.trim(); refreshPreview(); });
+      nick.addEventListener('input', ()=>{ state.nickname = nick.value.trim(); refreshPreview(); });
+
+      // when leaving the field, check nickname availability and try to reserve
+      let nickCheckTimer = null;
+      nick.addEventListener('blur', ()=>{ 
+        const val = nick.value.trim();
+        if (!val) return;
+        nickHint.textContent = 'Sprawdzam dostępność...';
+        checkAndReserveNickname(val).then(result=>{
+          if (result.available){
+            nickHint.textContent = 'Nickname jest dostępny i zarezerwowany tymczasowo.';
+            msgBox.innerHTML = `<div class="msg ok">Zarezerwowano nickname: ${escapeHtml(val)}</div>`;
+          } else {
+            nickHint.textContent = 'Nickname jest zajęty — wybierz inny.';
+            msgBox.innerHTML = `<div class="msg error">Nickname ${escapeHtml(val)} jest już zajęty.</div>`;
+          }
+        }).catch(err=>{
+          nickHint.textContent = 'Błąd sprawdzania nickname — spróbuj ponownie.';
+          msgBox.innerHTML = `<div class="msg error">Błąd: ${escapeHtml(String(err.message || err))}</div>`;
+        });
+      });
+
+      nextBtn.addEventListener('click', ()=>{
+        // basic validation
+        if (!birth.value){ showFormMsg(msgBox,'Podaj datę urodzenia','error'); return; }
+        if (!emailInput.value || !validateEmail(emailInput.value)){ showFormMsg(msgBox,'Podaj poprawny email','error'); return; }
+        if (!nick.value || nick.value.trim().length < 2){ showFormMsg(msgBox,'Nickname jest za krótki','error'); return; }
+        // require nickname reservation
+        if (!state.nicknameReserved) {
+          showFormMsg(msgBox,'Proszę sprawdzić i zarezerwować nickname (kliknij poza polem po wpisaniu)','error');
+          return;
+        }
+
+        // save state and go next
+        state.birthdate = birth.value;
+        state.email = emailInput.value.trim();
+        state.nickname = nick.value.trim();
+        goToStep(2);
+      });
+    }
+
+    // Check and reserve nickname in Firestore
+    async function checkAndReserveNickname(nick){
+      const key = nick.toLowerCase();
+      const ref = doc(db, 'nicknames', key);
+      try {
+        const snap = await getDoc(ref);
+        if (snap.exists()){
+          state.nicknameReserved = false;
+          return { available:false };
+        } else {
+          // create reservation document
+          await setDoc(ref, {
+            nickname: nick,
+            reserved: true,
+            reservedAt: serverTimestamp(),
+            reservedByEmail: state.email || null,
+            temp: true
+          });
+          state.nicknameReserved = true;
+          return { available:true };
+        }
+      } catch (err){
+        state.nicknameReserved = false;
+        throw err;
+      }
+    }
+
+    /* ------------------ STEP 2: Security ------------------ */
+    function renderStep2(){
+      contentArea.innerHTML = `
+        <h2>Step 2 — Security</h2>
+        <p class="lead">Wybierz bezpieczne hasło (min. 6 znaków).</p>
+
+        <div id="msgBox2"></div>
+
+        <form id="form2">
+          <div style="margin-bottom:10px">
+            <label for="pw">Hasło</label>
+            <input id="pw" type="password" placeholder="Hasło (min 6 znaków)" value="${escapeHtml(state.password)}" required />
+          </div>
+          <div style="margin-bottom:6px">
+            <label for="pw2">Powtórz hasło</label>
+            <input id="pw2" type="password" placeholder="Powtórz hasło" value="${escapeHtml(state.passwordRepeat)}" required />
+          </div>
+
+          <div class="buttons">
+            <button type="button" id="back2" class="btn secondary">← Back</button>
+            <button type="button" id="next2" class="btn primary">Next step →</button>
+          </div>
+        </form>
+      `;
+
+      const back2 = document.getElementById('back2');
+      const next2 = document.getElementById('next2');
+      const pw = document.getElementById('pw');
+      const pw2 = document.getElementById('pw2');
+      const msgBox2 = document.getElementById('msgBox2');
+
+      back2.addEventListener('click', ()=> goToStep(1));
+      next2.addEventListener('click', ()=>{
+        const p1 = pw.value || '';
+        const p2 = pw2.value || '';
+        if (p1.length < 6){ showFormMsg(msgBox2,'Hasło musi mieć minimum 6 znaków','error'); return; }
+        if (p1 !== p2){ showFormMsg(msgBox2,'Hasła nie pasują do siebie','error'); return; }
+        state.password = p1;
+        state.passwordRepeat = p2;
+        showFormMsg(msgBox2,'Hasło ustawione','ok');
+        goToStep(3);
+      });
+    }
+
+    /* ------------------ STEP 3: Personalisation ------------------ */
+    function renderStep3(){
+      contentArea.innerHTML = `
+        <h2>Step 3 — Personalisation</h2>
+        <p class="lead">Wybierz motyw i czcionkę interfejsu.</p>
+
+        <div id="msgBox3"></div>
+
+        <form id="form3">
+          <div style="margin-bottom:12px">
+            <label for="theme">Motyw</label>
+            <select id="theme">
+              <option value="standard">Standard</option>
+              <option value="light">Light</option>
+              <option value="blues">Blues</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:12px">
+            <label for="font">Czcionka</label>
+            <select id="font">
+              <option value="Poppins">Poppins (standard)</option>
+              <option value="Fredoka One">Fredoka One</option>
+              <option value="Luckiest Guy">Luckiest Guy</option>
+            </select>
+            <div class="note">Wybrana czcionka i motyw zostaną zapisane w personalisation przy utworzeniu konta.</div>
+          </div>
+
+          <div class="buttons">
+            <button type="button" id="back3" class="btn secondary">← Back</button>
+            <button type="button" id="next3" class="btn primary">Next step →</button>
+          </div>
+        </form>
+      `;
+
+      const back3 = document.getElementById('back3');
+      const next3 = document.getElementById('next3');
+      const theme = document.getElementById('theme');
+      const font = document.getElementById('font');
+      const msgBox3 = document.getElementById('msgBox3');
+
+      // initialize selects with current state
+      theme.value = state.theme || 'standard';
+      font.value = state.font || 'Poppins';
+
+      // Live update
+      theme.addEventListener('change', ()=>{ state.theme = theme.value; refreshPreview(); savePersonalisationLocal(); maybeSavePersonalisationToFirestore(); });
+      font.addEventListener('change', ()=>{ state.font = font.value; refreshPreview(); savePersonalisationLocal(); maybeSavePersonalisationToFirestore(); });
+
+      back3.addEventListener('click', ()=> goToStep(2));
+      next3.addEventListener('click', ()=> {
+        state.theme = theme.value;
+        state.font = font.value;
+        savePersonalisationLocal();
+        maybeSavePersonalisationToFirestore();
+        showFormMsg(msgBox3,'Personalizacja zapisana tymczasowo','ok');
+        goToStep(4);
+      });
+    }
+
+    // Save personalization to localStorage
+    function savePersonalisationLocal(){
+      const p = { theme: state.theme, font: state.font, ts: Date.now() };
+      localStorage.setItem('timesphere_personalisation', JSON.stringify(p));
+    }
+
+    // If user logged in (rare on register flow), save personalisation to Firestore under personalisation/{uid}
+    async function maybeSavePersonalisationToFirestore(){
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const ref = doc(db, 'personalisation', user.uid);
+        await setDoc(ref, {
+          theme: state.theme,
+          font: state.font,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        console.log('Personalisation saved to Firestore for', user.uid);
+      } catch (err){
+        console.warn('Could not save personalisation:', err);
+      }
+    }
+
+    /* ------------------ STEP 4: All done (Create Account) ------------------ */
+    function renderStep4(){
+      contentArea.innerHTML = `
+        <h2>Step 4 — All done!</h2>
+        <p class="lead">Wszystko gotowe. Kliknij <strong>Create Account</strong>, aby utworzyć konto i przejść do czatu.</p>
+
+        <div id="msgBox4"></div>
+
+        <div style="margin-top:8px">
+          <div class="small"><strong>Email:</strong> ${escapeHtml(state.email || '—')}</div>
+          <div class="small"><strong>Nickname:</strong> ${escapeHtml(state.nickname || '—')}</div>
+          <div class="small"><strong>Birthdate:</strong> ${escapeHtml(state.birthdate || '—')}</div>
+          <div class="small"><strong>Theme:</strong> ${escapeHtml(state.theme)}</div>
+          <div class="small"><strong>Font:</strong> ${escapeHtml(state.font)}</div>
+        </div>
+
+        <div class="buttons" style="margin-top:18px">
+          <button type="button" id="back4" class="btn secondary">← Back</button>
+          <button type="button" id="createBtn" class="btn primary">Create Account</button>
+        </div>
+      `;
+
+      document.getElementById('back4').addEventListener('click', ()=> goToStep(3));
+      document.getElementById('createBtn').addEventListener('click', createAccountHandler);
+    }
+
+    // Create account: create Firebase Auth user, then write personalisation and update nickname doc
+    async function createAccountHandler(){
+      const msgBox4 = document.getElementById('msgBox4');
+      // Basic checks
+      if (!state.email || !validateEmail(state.email)){ showFormMsg(msgBox4,'Podaj poprawny email','error'); return; }
+      if (!state.password || state.password.length < 6){ showFormMsg(msgBox4,'Hasło brak lub za krótkie','error'); return; }
+      if (!state.nickname || !state.nicknameReserved){ showFormMsg(msgBox4,'Nickname nie jest zarezerwowany','error'); return; }
+      // disable button
+      const btn = document.getElementById('createBtn');
+      btn.disabled = true;
+      btn.textContent = 'Tworzę konto...';
+
+      try {
+        // create user
+        const cred = await createUserWithEmailAndPassword(auth, state.email, state.password);
+        const uid = cred.user.uid;
+
+        // write personalisation doc under personalisation/{uid}
+        const pRef = doc(db, 'personalisation', uid);
+        await setDoc(pRef, {
+          theme: state.theme,
+          font: state.font,
+          createdAt: serverTimestamp()
+        }, { merge: true });
+
+        // update nickname doc: set uid and email, remove temp flag
+        const nickKey = state.nickname.toLowerCase();
+        const nickRef = doc(db, 'nicknames', nickKey);
+        await setDoc(nickRef, {
+          nickname: state.nickname,
+          uid,
+          email: state.email,
+          reserved: true,
+          temp: false,
+          assignedAt: serverTimestamp()
+        }, { merge: true });
+
+        // done -> redirect
+        window.location.href = '/timespheregpt/chats/';
+      } catch (err){
+        console.error(err);
+        const code = err?.code || '';
+        if (code === 'auth/email-already-in-use') showFormMsg(msgBox4,'Ten email jest już użyty','error');
+        else showFormMsg(msgBox4, 'Błąd tworzenia konta: ' + (err.message || code),'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    }
+
+    /* ------------------ small utilities ------------------ */
+    function showFormMsg(container, text, type='error'){
+      container.innerHTML = `<div class="msg ${type === 'error' ? 'error' : 'ok'}">${escapeHtml(text)}</div>`;
+    }
+
+    function validateEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function escapeHtml(s){ if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // Initialize UI on load
+    renderContent();
+
+    // Watch for popstate (user clicks browser back/forward) to adjust step
+    window.addEventListener('popstate', ()=> {
+      state.step = getStepFromUrl();
+      renderContent();
+    });
+
+    // Make step chips clickable to navigate
+    Object.values(stepsEls).forEach(el=>{
+      el.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const s = Number(el.dataset.step || '1');
+        goToStep(s);
+      });
+    });
+
+    // Try to load personalisation from localStorage if present
+    (function loadLocalPersonalisation(){
+      const raw = localStorage.getItem('timesphere_personalisation');
+      if (raw) {
+        try {
+          const p = JSON.parse(raw);
+          if (p.theme) state.theme = p.theme;
+          if (p.font) state.font = p.font;
+        } catch(e){}
+      }
+      refreshPreview();
+    })();
+  </script>
+</body>
+</html>
