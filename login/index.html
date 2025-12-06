@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TimeSphereGPT — Login</title>
+
+  <!-- Google Fonts (tekst) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Google Material Symbols (ikony) -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+  <style>
+    :root{
+      --bg1:#0f1724; --bg2:#071029;
+      --accent1:#8b5cf6; --accent2:#06b6d4;
+      --muted:rgba(255,255,255,0.7);
+      font-family:'Inter',system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#eaf2ff;padding:20px;
+    }
+
+    .card{
+      width:100%;max-width:420px;
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.03);
+      border-radius:12px; padding:20px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    }
+
+    .top{
+      display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
+    }
+    .logo-mark{
+      display:flex;gap:12px;align-items:center;
+    }
+    .logo-box{
+      width:44px;height:44px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent1),var(--accent2));
+      display:grid;place-items:center;font-weight:700;color:white;font-size:18px;
+    }
+    .title{font-weight:700}
+    .subtitle{font-size:12px;color:var(--muted)}
+
+    form {display:flex;flex-direction:column;gap:12px;margin-top:6px}
+    label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="email"], input[type="password"]{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.01); color:white; outline:none; font-size:14px;
+    }
+    .actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+    .btn-login{
+      display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));border:0;color:white;font-weight:700;
+      cursor:pointer;
+    }
+    .btn-login:disabled{opacity:0.6;cursor:not-allowed}
+    .link-create{font-size:13px;color:var(--muted);text-decoration:none}
+    .link-create:hover{text-decoration:underline}
+    .info{font-size:13px;color:var(--muted);margin-top:8px}
+    .error{color:#ffb4b4;background:rgba(255,180,180,0.04);padding:8px;border-radius:8px;font-size:13px}
+    .small-muted{font-size:12px;color:var(--muted)}
+    .material-symbols-outlined{font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 24;}
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="heading-login">
+    <div class="top">
+      <div class="logo-mark" aria-hidden="false">
+        <div class="logo-box">TS</div>
+        <div>
+          <div id="heading-login" class="title">TimeSphereGPT</div>
+          <div class="subtitle">Zaloguj się, aby kontynuować</div>
+        </div>
+      </div>
+
+      <button id="backHome" title="Strona główna" style="background:transparent;border:0;color:var(--muted);cursor:pointer">
+        <span class="material-symbols-outlined" aria-hidden="true">home</span>
+      </button>
+    </div>
+
+    <div id="errorBox" style="display:none" class="error" role="alert"></div>
+
+    <form id="loginForm" aria-describedby="loginDesc" novalidate>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="twoj@email.pl" autocomplete="email" required>
+      </div>
+
+      <div>
+        <label for="password">Hasło</label>
+        <input id="password" name="password" type="password" placeholder="Twoje hasło" autocomplete="current-password" required>
+      </div>
+
+      <div class="actions">
+        <button type="submit" id="loginBtn" class="btn-login"><span class="material-symbols-outlined" aria-hidden="true">login</span>Login</button>
+
+        <div style="text-align:right">
+          <div class="small-muted">Don't have account? <a id="createLink" class="link-create" href="/timespheregpt/register/step-1/">Create</a></div>
+        </div>
+      </div>
+    </form>
+
+    <div id="loginDesc" class="info">
+      Po zalogowaniu zostaniesz przeniesiony na <code>/timespheregpt/chats/</code>.
+    </div>
+  </div>
+
+  <!-- Firebase (modular SDK) -->
+  <script type="module">
+    // Import Firebase modular SDK from CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    // Your web app's Firebase configuration (użyte przez Ciebie)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5hHDpz0oYg5sW-EeCierI75fiMScowyw",
+      authDomain: "timespheregpt.firebaseapp.com",
+      projectId: "timespheregpt",
+      storageBucket: "timespheregpt.firebasestorage.app",
+      messagingSenderId: "778476965380",
+      appId: "1:778476965380:web:a9c78bfb824eb3a3baaf51"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Elements
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorBox = document.getElementById('errorBox');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const createLink = document.getElementById('createLink');
+    const backHome = document.getElementById('backHome');
+
+    // Back to home (optional)
+    backHome.addEventListener('click', ()=>{ window.location.href = '/'; });
+
+    // If user is already logged in, redirect immediately
+    let redirected = false;
+    onAuthStateChanged(auth, (user) => {
+      if (user && !redirected) {
+        redirected = true;
+        // optional: you can check user.emailVerified etc.
+        window.location.href = '/timespheregpt/chats/';
+      }
+    });
+
+    // Helper to show errors
+    function showError(msg) {
+      errorBox.style.display = 'block';
+      errorBox.textContent = msg;
+      setTimeout(()=>{ errorBox.style.opacity = 1 }, 10);
+    }
+    function clearError() {
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+    }
+
+    // Form submit -> sign in with Firebase Auth
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email) { showError('Podaj poprawny email.'); return; }
+      if (!password) { showError('Podaj hasło.'); return; }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logowanie...';
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        // success -> redirect to chats
+        window.location.href = '/timespheregpt/chats/';
+      } catch (err) {
+        // Map common Firebase errors to friendly messages
+        const code = err?.code || '';
+        if (code === 'auth/wrong-password') showError('Nieprawidłowe hasło.');
+        else if (code === 'auth/user-not-found') showError('Konto o tym adresie email nie istnieje.');
+        else if (code === 'auth/invalid-email') showError('Nieprawidłowy adres email.');
+        else if (code === 'auth/too-many-requests') showError('Zbyt wiele nieudanych prób. Spróbuj później.');
+        else showError('Błąd logowania: ' + (err.message || 'nieznany błąd.'));
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">login</span>Login';
+      }
+    });
+
+    // Optional: if user clicks Create (already navigates via href) we keep default behavior.
+    createLink.addEventListener('click', () => {
+      // navigation is handled by href; no-op here but kept for clarity
+    });
+  </script>
+</body>
+  </html>
