@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TimeSphereGPT — Chats</title>
+
+<!-- Fonts (three available) -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Fredoka+One&family=Luckiest+Guy&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+<style>
+  :root{
+    --bg1:#0f1724; --bg2:#071029;
+    --card: rgba(255,255,255,0.03);
+    --accent1:#8b5cf6; --accent2:#06b6d4;
+    --muted: rgba(255,255,255,0.7);
+  }
+  html,body{height:100%;margin:0;font-family:Poppins, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+  body{background:linear-gradient(180deg,var(--bg1),var(--bg2)); color:#eaf2ff; display:flex;align-items:stretch; padding:18px; gap:12px;}
+
+  .app{
+    width:100%; max-width:1200px; margin:auto;
+    height:calc(100vh - 36px); border-radius:12px; overflow:hidden;
+    display:grid; grid-template-columns:320px 1fr; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.03);
+    box-shadow:0 18px 60px rgba(2,6,23,0.6);
+  }
+
+  /* LEFT sidebar */
+  .sidebar{padding:18px; border-right:1px solid rgba(255,255,255,0.02); display:flex;flex-direction:column;}
+  .side-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .title{font-weight:700;font-size:16px}
+  .plus-btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:0;padding:8px 10px;border-radius:10px;color:white;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none;}
+  .chats-list{flex:1; overflow:auto; margin-top:10px; display:flex;flex-direction:column; gap:8px; padding-right:6px;}
+  .chat-item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02);cursor:pointer;}
+  .chat-item .left{display:flex;gap:12px;align-items:center}
+  .chat-icon{width:40px;height:40;border-radius:8px;background:linear-gradient(135deg,#16213e,#1e3a8a);display:grid;place-items:center;font-weight:700;}
+  .chat-name{font-weight:600}
+  .chat-actions{display:flex;gap:8px;align-items:center}
+  .icon-btn{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px}
+  .icon-btn:hover{background:rgba(255,255,255,0.02)}
+  .sidebar-footer{display:flex;align-items:center;gap:8px;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(255,255,255,0.02)}
+  .settings-link{color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:8px}
+
+  /* RIGHT content */
+  .content{display:flex;flex-direction:column;padding:18px;gap:12px}
+  .content-top{display:flex;align-items:center;justify-content:space-between}
+  .tokens-btn{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer}
+  .messages{flex:1;overflow:auto;padding:12px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(255,255,255,0.02)}
+  .msg{display:flex;gap:12px;margin-bottom:12px;align-items:flex-end}
+  .msg.user{justify-content:flex-end}
+  .bubble{max-width:72%;padding:10px 12px;border-radius:12px;line-height:1.35}
+  .bubble.user{background:linear-gradient(135deg,#0ea5a9,#06b6d4);color:#022;border-bottom-right-radius:4px}
+  .bubble.bot{background:rgba(255,255,255,0.03);color:var(--muted);border-bottom-left-radius:4px}
+  .composer{display:flex;align-items:center;gap:10px;padding-top:8px}
+  .compose-left{display:flex;align-items:center;gap:8px}
+  .bulb{background:rgba(255,255,255,0.02);padding:8px;border-radius:10px;cursor:pointer}
+  .input{flex:1;display:flex;align-items:center;background:rgba(255,255,255,0.01);padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+  .input input{width:100%;border:0;background:transparent;color:var(--muted);outline:none;padding:6px}
+  .send-btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));padding:8px 12px;border-radius:10px;border:0;color:white;cursor:pointer}
+  .placeholder{color:var(--muted);text-align:center;padding:28px}
+
+  /* confirmation modal */
+  .modal-back{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.6)}
+  .modal{background:#081224;padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);min-width:320px}
+  .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+
+  /* themes */
+  body.theme-standard{background:linear-gradient(180deg,#0f1724,#071029);color:#eaf2ff}
+  body.theme-light{background:linear-gradient(180deg,#f7fafc,#eef2ff);color:#0b1720}
+  body.theme-blues{background:linear-gradient(180deg,#05204a,#0d3b66);color:#eaf2ff}
+
+  /* font mapping classes */
+  .font-Poppins{font-family:'Poppins', system-ui, -apple-system;}
+  .font-Fredoka\ One{font-family:'Fredoka One', cursive;}
+  .font-Luckiest\ Guy{font-family:'Luckiest Guy', cursive;}
+
+  @media (max-width:920px){
+    .app{grid-template-columns:1fr}
+    .sidebar{display:none}
+  }
+</style>
+</head>
+<body class="theme-standard font-Poppins">
+
+<div class="app" role="application" aria-label="TimeSphereGPT Chats App">
+  <!-- LEFT -->
+  <aside class="sidebar" aria-label="Lista czatów">
+    <div class="side-top">
+      <div>
+        <div class="title">Your chats</div>
+        <div style="font-size:12px;color:var(--muted)">Wybierz czat lub utwórz nowy</div>
+      </div>
+
+      <a class="plus-btn" href="/timespheregpt/create/" title="Utwórz nowy czat">
+        <span class="material-symbols-outlined">add</span> New
+      </a>
+    </div>
+
+    <div class="chats-list" id="chatsList" role="list" aria-label="Lista twoich czatów">
+      <!-- chat items injected here -->
+      <div id="chatsPlaceholder" class="placeholder">Ładowanie listy czatów...</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <a class="settings-link" href="/timespheregpt/settings/" title="Ustawienia">
+        <span class="material-symbols-outlined">settings</span> Settings
+      </a>
+
+      <div style="font-size:13px;color:var(--muted)"><button id="signOutBtn" class="icon-btn" title="Wyloguj">Wyloguj</button></div>
+    </div>
+  </aside>
+
+  <!-- RIGHT -->
+  <main class="content" aria-live="polite">
+    <div class="content-top">
+      <div id="currentChatTitle" style="font-weight:700">Wybierz czat</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button id="tokensBtn" class="tokens-btn" title="Tokeny — kliknij aby zarządzać">Tokens: <span id="tokensCount">—</span></button>
+      </div>
+    </div>
+
+    <div id="messages" class="messages" aria-label="Wiadomości czatu">
+      <div class="placeholder" id="emptyView">Wybierz czat po lewej, aby zobaczyć wiadomości.</div>
+    </div>
+
+    <div class="composer" aria-label="Kompozytor">
+      <div class="compose-left">
+        <button id="bulbToggle" class="bulb" title="Use brainy template (consumes 1 token)">
+          <span id="bulbIcon" class="material-symbols-outlined">lightbulb</span>
+        </button>
+      </div>
+
+      <div class="input">
+        <input id="msgInput" placeholder="Napisz wiadomość..." aria-label="Wiadomość"/>
+      </div>
+      <button id="sendBtn" class="send-btn">Wyślij</button>
+    </div>
+  </main>
+</div>
+
+<!-- confirmation modal for delete -->
+<div id="modal" class="modal-back" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal">
+    <div id="modalText">Czy na pewno chcesz usunąć ten czat?</div>
+    <div class="actions">
+      <button id="modalCancel" class="btn ghost">Anuluj</button>
+      <button id="modalConfirm" class="btn primary" style="background:#ef4444">Usuń</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  // Firebase SDK (modular)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+  import {
+    getFirestore, collection, query, where, onSnapshot,
+    doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+    orderBy, serverTimestamp, getDocs
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  // Your firebaseConfig (use the one you've been using)
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5hHDpz0oYg5sW-EeCierI75fiMScowyw",
+    authDomain: "timespheregpt.firebaseapp.com",
+    projectId: "timespheregpt",
+    storageBucket: "timespheregpt.firebasestorage.app",
+    messagingSenderId: "778476965380",
+    appId: "1:778476965380:web:a9c78bfb824eb3a3baaf51"
+  };
+
+  // init
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // UI refs
+  const chatsList = document.getElementById('chatsList');
+  const chatsPlaceholder = document.getElementById('chatsPlaceholder');
+  const messagesEl = document.getElementById('messages');
+  const emptyView = document.getElementById('emptyView');
+  const currentChatTitle = document.getElementById('currentChatTitle');
+  const tokensCount = document.getElementById('tokensCount');
+  const tokensBtn = document.getElementById('tokensBtn');
+  const bulbToggle = document.getElementById('bulbToggle');
+  const bulbIcon = document.getElementById('bulbIcon');
+  const msgInput = document.getElementById('msgInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const signOutBtn = document.getElementById('signOutBtn');
+
+  const modal = document.getElementById('modal');
+  const modalText = document.getElementById('modalText');
+  const modalCancel = document.getElementById('modalCancel');
+  const modalConfirm = document.getElementById('modalConfirm');
+
+  // state
+  let currentUser = null;
+  let chatsUnsub = null;
+  let messagesUnsub = null;
+  let activeChatId = null;
+  let useBrainy = false; // bulb toggle
+  let userMeta = { tokens: 0, lastRefill: null };
+
+  // helper: apply personalisation (theme & font)
+  async function applyPersonalisation(uid){
+    try {
+      const ref = doc(db, 'personalisation', uid);
+      const snap = await getDoc(ref);
+      const body = document.body;
+      // default
+      let theme = 'standard', font = 'Poppins';
+      if (snap.exists()){
+        const data = snap.data();
+        if (data.theme) theme = data.theme;
+        if (data.font) font = data.font;
+      }
+      // apply classes
+      body.classList.remove('theme-standard','theme-light','theme-blues','font-Poppins','font-Fredoka\\ One','font-Luckiest\\ Guy');
+      body.classList.add(`theme-${theme}`);
+      // note: class names with space need escaping; but we use exact class names set in stylesheet
+      if (font === 'Poppins') body.classList.add('font-Poppins');
+      if (font === 'Fredoka One') body.classList.add('font-Fredoka\\ One');
+      if (font === 'Luckiest Guy') body.classList.add('font-Luckiest\\ Guy');
+    } catch (err){
+      console.warn('Cannot apply personalisation', err);
+    }
+  }
+
+  // ===== tokens management =====
+  async function ensureUserMeta(uid){
+    const ref = doc(db, 'user_meta', uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()){
+      // create with default 10 tokens and lastRefill = now
+      await setDoc(ref, { tokens: 10, lastRefill: serverTimestamp() });
+      userMeta.tokens = 10;
+      userMeta.lastRefill = new Date();
+      updateTokensUI();
+      return;
+    }
+    const data = snap.data();
+    userMeta.tokens = typeof data.tokens === 'number' ? data.tokens : 10;
+    userMeta.lastRefill = data.lastRefill ? data.lastRefill.toDate() : new Date();
+    // try refill daily
+    await refillTokensIfNeeded(uid);
+  }
+
+  async function refillTokensIfNeeded(uid){
+    const ref = doc(db, 'user_meta', uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const last = data.lastRefill ? data.lastRefill.toDate() : new Date();
+    const now = new Date();
+    const days = Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()) - Date.UTC(last.getFullYear(),last.getMonth(),last.getDate())) / (24*60*60*1000));
+    if (days > 0){
+      const add = days * 3;
+      const newTokens = (data.tokens || 0) + add;
+      await updateDoc(ref, { tokens: newTokens, lastRefill: serverTimestamp() });
+      userMeta.tokens = newTokens;
+      userMeta.lastRefill = now;
+      updateTokensUI();
+    } else {
+      userMeta.tokens = data.tokens || 0;
+      updateTokensUI();
+    }
+  }
+
+  function updateTokensUI(){
+    tokensCount.textContent = (userMeta.tokens != null ? userMeta.tokens : '—');
+  }
+
+  async function consumeToken(uid){
+    const ref = doc(db, 'user_meta', uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return false;
+    const data = snap.data();
+    if ((data.tokens || 0) <= 0) return false;
+    const newTokens = (data.tokens || 0) - 1;
+    await updateDoc(ref, { tokens: newTokens });
+    userMeta.tokens = newTokens;
+    updateTokensUI();
+    return true;
+  }
+
+  // ===== auth check =====
+  onAuthStateChanged(auth, async (user) => {
+    if (!user){
+      // not logged in -> redirect to login
+      location.href = '/timespheregpt/login/';
+      return;
+    }
+    // logged in -> initialize app
+    currentUser = user;
+    await applyPersonalisation(user.uid);
+    await ensureUserMeta(user.uid);
+    startListeningChats(user.uid);
+  });
+
+  // sign out
+  signOutBtn.addEventListener('click', async ()=>{
+    await signOut(auth);
+    location.href = '/timespheregpt/login/';
+  });
+
+  // open tokens page
+  tokensBtn.addEventListener('click', ()=> location.href = '/timespheregpt/tokens/');
+
+  // bulb toggle
+  bulbToggle.addEventListener('click', ()=> {
+    useBrainy = !useBrainy;
+    bulbIcon.style.opacity = useBrainy ? '1' : '0.6';
+    bulbToggle.title = useBrainy ? 'Brainy ON (consumes 1 token)' : 'Brainy OFF';
+  });
+
+  // ========== CHATS LIST (real-time) ==========
+  function startListeningChats(uid){
+    // unsubscribe if previous
+    if (chatsUnsub) chatsUnsub();
+    const col = collection(db, 'user_chats');
+    const q = query(col, where('owner', '==', uid), orderBy('createdAt','desc'));
+    chatsUnsub = onSnapshot(q, (snapshot) => {
+      renderChats(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err) => {
+      console.error('Chats snapshot error', err);
+    });
+  }
+
+  function renderChats(chats){
+    // clear
+    chatsList.innerHTML = '';
+    if (!chats.length){
+      chatsPlaceholder.textContent = 'Brak czatów — utwórz nowy (przycisk New)';
+      chatsList.appendChild(chatsPlaceholder);
+      return;
+    }
+    chats.forEach(chat => {
+      const item = document.createElement('div');
+      item.className = 'chat-item';
+      item.setAttribute('role','listitem');
+
+      const left = document.createElement('div');
+      left.className = 'left';
+
+      const icon = document.createElement('div');
+      icon.className = 'chat-icon';
+      icon.textContent = (chat.name || 'C').slice(0,2).toUpperCase();
+
+      const name = document.createElement('div');
+      name.className = 'chat-name';
+      name.textContent = chat.name || '(Bez nazwy)';
+
+      left.appendChild(icon);
+      left.appendChild(name);
+
+      const actions = document.createElement('div');
+      actions.className = 'chat-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'icon-btn';
+      editBtn.title = 'Edytuj';
+      editBtn.innerHTML = '<span class="material-symbols-outlined">edit</span>';
+      editBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        // navigate to edit
+        location.href = `/timespheregpt/edit/${encodeURIComponent(chat.id)}/`;
+      });
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn';
+      delBtn.title = 'Usuń';
+      delBtn.innerHTML = '<span class="material-symbols-outlined">delete</span>';
+      delBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        confirmDeleteChat(chat.id, chat.name);
+      });
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      item.appendChild(left);
+      item.appendChild(actions);
+
+      // click to select chat
+      item.addEventListener('click', ()=>{
+        selectChat(chat.id, chat.name);
+      });
+
+      chatsList.appendChild(item);
+    });
+  }
+
+  // ========== SELECT CHAT & MESSAGES ==========
+  async function selectChat(chatId, chatName){
+    activeChatId = chatId;
+    currentChatTitle.textContent = chatName || 'Czat';
+    // clear messages area
+    messagesEl.innerHTML = '<div class="placeholder">Ładowanie wiadomości…</div>';
+    // unsubscribe previous messages listener
+    if (messagesUnsub) messagesUnsub();
+    // listen to subcollection user_chats/{chatId}/messages
+    const messagesCol = collection(db, 'user_chats', chatId, 'messages');
+    const q = query(messagesCol, orderBy('createdAt','asc'));
+    messagesUnsub = onSnapshot(q, (snapshot)=>{
+      renderMessages(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    }, (err)=> {
+      console.error('Messages snapshot error', err);
+      messagesEl.innerHTML = '<div class="placeholder">Błąd przy ładowaniu wiadomości.</div>';
+    });
+  }
+
+  function renderMessages(msgs){
+    messagesEl.innerHTML = '';
+    if (!msgs.length){
+      messagesEl.innerHTML = '<div class="placeholder">Tutaj jeszcze pusto — napisz coś!</div>';
+      return;
+    }
+    msgs.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'msg ' + (m.sender === 'user' ? 'user' : 'bot');
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + (m.sender === 'user' ? 'user' : 'bot');
+      bubble.textContent = m.text || '';
+
+      if (m.sender === 'user'){
+        row.appendChild(bubble);
+      } else {
+        row.appendChild(bubble);
+      }
+
+      messagesEl.appendChild(row);
+    });
+    // scroll to bottom
+    messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: 'smooth' });
+  }
+
+  // ========== SENDING MESSAGE ==========
+  sendBtn.addEventListener('click', ()=> sendMessage());
+  msgInput.addEventListener('keydown', (e)=> { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); } });
+
+  async function sendMessage(){
+    const text = msgInput.value.trim();
+    if (!text) return;
+    if (!activeChatId){
+      alert('Wybierz czat po lewej lub utwórz nowy.');
+      return;
+    }
+
+    // If using brainy and it consumes token -> check tokens
+    if (useBrainy){
+      const ok = await consumeToken(currentUser.uid);
+      if (!ok){
+        alert('Brak tokenów — poczekaj na doładowanie lub kup tokeny.');
+        return;
+      }
+    }
+
+    // add user message
+    const messagesColRef = collection(db, 'user_chats', activeChatId, 'messages');
+    await addDoc(messagesColRef, {
+      sender: 'user',
+      text,
+      createdAt: serverTimestamp()
+    });
+
+    msgInput.value = '';
+    // show "myślę..." if brainy for UX
+    if (useBrainy){
+      const thinkingMsgRef = await addDoc(messagesColRef, {
+        sender: 'bot',
+        text: 'Myślę...',
+        createdAt: serverTimestamp(),
+        placeholder: true
+      });
+    }
+
+    // produce bot reply using templates
+    try {
+      const replyText = await generateBotReply(text, useBrainy);
+      // remove placeholder "Myślę..." if exists: find last placeholder and update it
+      const q = query(collection(db, 'user_chats', activeChatId, 'messages'), orderBy('createdAt','desc'));
+      const docs = await getDocs(q);
+      // try to find first placeholder by "placeholder" true and sender bot
+      const placeholderDoc = docs.docs.find(d => d.data().placeholder === true && d.data().sender === 'bot');
+      if (placeholderDoc){
+        // update doc text replacing placeholder
+        const phRef = doc(db, 'user_chats', activeChatId, 'messages', placeholderDoc.id);
+        await updateDoc(phRef, { text: replyText, placeholder: false, createdAt: serverTimestamp() });
+      } else {
+        // add new bot message
+        await addDoc(collection(db, 'user_chats', activeChatId, 'messages'), {
+          sender: 'bot',
+          text: replyText,
+          createdAt: serverTimestamp()
+        });
+      }
+    } catch (err){
+      console.error('generate reply error', err);
+      await addDoc(collection(db, 'user_chats', activeChatId, 'messages'), {
+        sender: 'bot',
+        text: 'Przepraszam, wystąpił błąd przy generowaniu odpowiedzi.',
+        createdAt: serverTimestamp()
+      });
+    }
+  }
+
+  // Simulate generation by choosing random template from Firestore collections
+  async function generateBotReply(userText, brainy){
+    // choose collection name
+    const colName = brainy ? 'brainy_template' : 'messages_template';
+    try {
+      const colRef = collection(db, colName);
+      const docs = await getDocs(colRef);
+      const arr = docs.docs.map(d => d.data().text).filter(Boolean);
+      if (arr.length > 0){
+        // pick random template and inject some user context
+        const tpl = arr[Math.floor(Math.random()*arr.length)];
+        // simple replacement placeholders e.g. {user} or {topic}
+        let reply = tpl.replace(/\{user\}/g, currentUser.email || 'User').replace(/\{topic\}/g, guessTopicFrom(userText));
+        // add small random variation
+        if (Math.random() < 0.3) reply += ' — dodatkowo mogę to rozwinąć, jeśli chcesz.';
+        return reply;
+      } else {
+        // fallback style: short relevant answer with random variation
+        return fallbackReply(userText, brainy);
+      }
+    } catch (err){
+      console.warn('generateBotReply error', err);
+      return fallbackReply(userText, brainy);
+    }
+  }
+
+  function guessTopicFrom(text){
+    // very small heuristic to include the topic word
+    const words = text.split(/\s+/).filter(Boolean);
+    if (!words.length) return 'temat';
+    // prefer nouns/long words: pick longest token
+    let longest = words.reduce((a,b)=> a.length >= b.length ? a : b, words[0]);
+    // trim punctuation
+    return longest.replace(/[^\wąęółśćźżĄĘÓŁŚĆŻŹ-]/g,'');
+  }
+
+  function fallbackReply(text, brainy){
+    // Create a short, theme-relative pseudo-random reply
+    const topicsfx = guessTopicFrom(text);
+    if (brainy){
+      return `Szczegółowa analiza dotycząca "${topicsfx}": oto kilka pomysłów i punktów do rozważenia — 1) ... 2) ... 3) ... Jeśli chcesz, rozwinę dowolny punkt.`;
+    } else {
+      const short = [`To zależy od kontekstu ${topicsfx}.`, `Generalnie ${topicsfx} można rozwiązać tak: ...`, `Krótko: sprawdź następujące kroki dotyczące ${topicsfx}.`];
+      return short[Math.floor(Math.random()*short.length)];
+    }
+  }
+
+  // ========== DELETE CHAT with confirmation ==========
+  let chatToDelete = null;
+  function confirmDeleteChat(chatId, chatName){
+    chatToDelete = chatId;
+    modalText.textContent = `Czy na pewno chcesz usunąć czat "${chatName}"?`;
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden','false');
+  }
+
+  modalCancel.addEventListener('click', ()=>{
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden','true');
+    chatToDelete = null;
+  });
+
+  modalConfirm.addEventListener('click', async ()=>{
+    if (!chatToDelete) return;
+    try {
+      // delete subcollection messages first (list & delete)
+      const msgsCol = collection(db, 'user_chats', chatToDelete, 'messages');
+      const snapshot = await getDocs(msgsCol);
+      const promises = snapshot.docs.map(d => deleteDoc(doc(db, 'user_chats', chatToDelete, 'messages', d.id)));
+      await Promise.all(promises);
+      // delete chat doc
+      await deleteDoc(doc(db, 'user_chats', chatToDelete));
+      // if the deleted chat was active, clear UI
+      if (activeChatId === chatToDelete){
+        activeChatId = null;
+        currentChatTitle.textContent = 'Wybierz czat';
+        messagesEl.innerHTML = '<div class="placeholder">Wybierz czat po lewej, aby zobaczyć wiadomości.</div>';
+      }
+    } catch (err){
+      console.error('delete chat error', err);
+      alert('Błąd podczas usuwania czatu.');
+    } finally {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden','true');
+      chatToDelete = null;
+    }
+  });
+
+  // ====== select first chat on load (optional UX): handled by onSnapshot rendering
+  // Also: protect against navigation when unauthenticated — handled by onAuthStateChanged
+
+  // initial bulb icon style
+  bulbIcon.style.opacity = '0.6';
+</script>
+</body>
+</html>
