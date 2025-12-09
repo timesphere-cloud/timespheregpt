@@ -244,6 +244,7 @@
     userMeta.lastRefill = data.lastRefill ? data.lastRefill.toDate() : new Date();
     // try refill daily
     await refillTokensIfNeeded(uid);
+    updateTokensUI();
   }
 
   async function refillTokensIfNeeded(uid){
